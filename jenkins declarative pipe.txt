@@ -1,0 +1,34 @@
+#!groovy
+pipeline {
+    environment {
+        registry = "adnanurf/mng"
+        registryCredentials = 'dockerwala'
+    }
+    agent { label 'adnan'}
+    stages {
+        stage('clone git repository') {
+            steps {
+                git credentialsId: 'tiger1' , url: 'https://github.com/tomatot59/rps-ant.git'
+            }    
+        }
+        stage('build a docker image') {
+            steps {
+                sh 'echo build a docker image'
+                script {
+                    image = docker.build("${registry}:$BUILD_NUMBER")
+                }
+            }
+        }
+        stage('push docker to registry') {
+            steps {
+                sh 'echo push to registry'
+                script {
+                    docker.withRegistry('', registryCredentials) {
+                    image.push()
+                    image.push('latest')
+                    }
+                }    
+            }
+        }
+    }
+}    
